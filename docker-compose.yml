@@ -1,0 +1,92 @@
+version: '3.7'
+
+secrets:
+  cf_dns_token:
+    file: "./secrets/cf_dns_token.secret"
+  basicauth_users:
+    file: "./secrets/basicauth_users.secret"
+
+services:
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.2
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesResolvers.myresolver.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
+      - "--certificatesresolvers.myresolver.acme.email=${EMAIL:?Set $$EMAIL in env}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      # Uncomment below lines for testing
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      #- "--log.level=DEBUG"
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The HTTPS port
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./appdata/letsencrypt:/letsencrypt
+    environment:
+      - "CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_token"
+    secrets:
+      - "cf_dns_token"
+      - "basicauth_users"
+    labels:
+      # global redirect to https
+      - 'traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)'
+      - 'traefik.http.routers.http-catchall.entrypoints=web'
+      - 'traefik.http.routers.http-catchall.middlewares=redirect-to-https'
+      - 'traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https'
+
+      # global wildcard cert
+      - 'traefik.http.routers.wildcard-certs.tls.certresolver=myresolver'
+      - 'traefik.http.routers.wildcard-certs.tls.domains[0].main=${HOST_URL:?Set $$HOST_URL in env}'
+      - 'traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.${HOST_URL:?Set $$HOST_URL in env}'
+
+      # dashboard
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`proxy.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.usersFile=/run/secrets/basicauth_users"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+
+  speedtest:
+    image: "adolfintel/speedtest:latest"
+    environment:
+      - TITLE=${HOST_NAME:?Set $$HOST_NAME in env} Speedtest
+      - MODE=standalone
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.speedtest.rule=Host(`speedtest.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.speedtest.entrypoints=websecure"
+      - "traefik.http.routers.speedtest.tls=true"
+      # - "traefik.http.routers.speedtest.tls.certresolver=myresolver"
+    restart: unless-stopped
+
+  home-assistant:
+    image: homeassistant/home-assistant:stable
+    volumes:
+      - ./appdata/home-assistant:/config
+    ports:
+      - "8123:8123"
+    devices:
+      - /dev/ttyACM0
+    environment:
+      - TZ='America/Chicago'
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.home-assistant.rule=Host(`ha.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.home-assistant.entrypoints=websecure"
+      - "traefik.http.routers.home-assistant.tls=true"
