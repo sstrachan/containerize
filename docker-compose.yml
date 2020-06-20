@@ -62,19 +62,6 @@ services:
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.entrypoints=websecure"
 
-  speedtest:
-    image: "adolfintel/speedtest:latest"
-    environment:
-      - TITLE=${HOST_NAME:?Set $$HOST_NAME in env} Speedtest
-      - MODE=standalone
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.speedtest.rule=Host(`speedtest.${HOST_URL:?Set $$HOST_URL in env}`)"
-      - "traefik.http.routers.speedtest.entrypoints=websecure"
-      - "traefik.http.routers.speedtest.tls=true"
-      # - "traefik.http.routers.speedtest.tls.certresolver=myresolver"
-    restart: unless-stopped
-
   home-assistant:
     image: homeassistant/home-assistant:stable
     volumes:
@@ -91,6 +78,43 @@ services:
       - "traefik.http.routers.home-assistant.rule=Host(`ha.${HOST_URL:?Set $$HOST_URL in env}`)"
       - "traefik.http.routers.home-assistant.entrypoints=websecure"
       - "traefik.http.routers.home-assistant.tls=true"
+
+  plex:
+    image: plexinc/pms-docker
+    restart: unless-stopped
+    ports:
+      - 32400:32400/tcp
+      - 3005:3005/tcp
+      - 8324:8324/tcp
+      - 32469:32469/tcp
+      - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+    environment:
+      - TZ='America/Chicago'
+      - ADVERTISE_IP=http://192.168.1.100:32400/
+      - PLEX_UID=1000
+      - PLEX_GID=1000
+    hostname: mioplex
+    volumes:
+      - ./appdata/plex/database:/config
+      - ./appdata/plex/transcode:/transcode
+      - /mnt/storage/Videos:/data
+
+  speedtest:
+    image: "adolfintel/speedtest:latest"
+    environment:
+      - TITLE=${HOST_NAME:?Set $$HOST_NAME in env} Speedtest
+      - MODE=standalone
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.speedtest.rule=Host(`speedtest.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.speedtest.entrypoints=websecure"
+      - "traefik.http.routers.speedtest.tls=true"
+      # - "traefik.http.routers.speedtest.tls.certresolver=myresolver"
+    restart: unless-stopped
 
   unifi:
     image: jacobalberty/unifi:stable
