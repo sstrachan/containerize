@@ -143,6 +143,26 @@ services:
       - "traefik.http.routers.radarr.tls=true"
       - "traefik.http.routers.radarr.middlewares=auth"
 
+  sonarr:
+    image: linuxserver/sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ='America/Chicago'
+    volumes:
+      - ./appdata/sonarr:/config
+      - /mnt/storage/tv:/tv
+      - ./appdata/nzbget/downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.sonarr.entrypoints=websecure"
+      - "traefik.http.routers.sonarr.tls=true"
+      - "traefik.http.routers.sonarr.middlewares=auth"
+
   speedtest:
     image: "adolfintel/speedtest:latest"
     environment:
