@@ -101,7 +101,8 @@ services:
     volumes:
       - ./appdata/plex/database:/config
       - ./appdata/plex/transcode:/transcode
-      - /mnt/storage/Videos:/data
+      - /mnt/storage/movies:/movies
+      - /mnt/storage/tv:/tv
 
   speedtest:
     image: "adolfintel/speedtest:latest"
