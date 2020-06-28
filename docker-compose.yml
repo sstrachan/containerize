@@ -123,6 +123,26 @@ services:
       - /mnt/storage/movies:/movies
       - /mnt/storage/tv:/tv
 
+  radarr:
+    image: linuxserver/radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ='America/Chicago'
+    volumes:
+      - ./appdata/radarr:/config
+      - /mnt/storage/movies:/movies
+      - ./appdata/nzbget/downloads:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.radarr.entrypoints=websecure"
+      - "traefik.http.routers.radarr.tls=true"
+      - "traefik.http.routers.radarr.middlewares=auth"
+
   speedtest:
     image: "adolfintel/speedtest:latest"
     environment:
