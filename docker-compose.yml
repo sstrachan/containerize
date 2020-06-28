@@ -79,6 +79,25 @@ services:
       - "traefik.http.routers.home-assistant.entrypoints=websecure"
       - "traefik.http.routers.home-assistant.tls=true"
 
+  nzbget:
+    image: linuxserver/nzbget
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ='America/Chicago'
+    volumes:
+      - ./appdata/nzbget/config:/config
+      - ./appdata/nzbget/downloads:/downloads
+    ports:
+      - 6789:6789
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nzbget.rule=Host(`nzbget.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.nzbget.entrypoints=websecure"
+      - "traefik.http.routers.nzbget.tls=true"
+      - "traefik.http.routers.nzbget.middlewares=auth"
+
   plex:
     image: plexinc/pms-docker
     restart: unless-stopped
