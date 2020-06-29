@@ -109,6 +109,12 @@ services:
     ports:
       - 5076:5076
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hydra.rule=Host(`hydra.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.hydra.entrypoints=websecure"
+      - "traefik.http.routers.hydra.tls=true"
+      - "traefik.http.routers.hydra.middlewares=auth"
 
   plex:
     image: plexinc/pms-docker
