@@ -78,7 +78,7 @@ services:
     devices:
       - "/dev/serial/by-id/usb-0658_0200-if00:/dev/ttyACM0"
     environment:
-      - TZ='America/Chicago'
+      - TZ=America/Chicago
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -91,7 +91,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ='America/Chicago'
+      - TZ=America/Chicago
     volumes:
       - ./appdata/nzbget/config:/config
       - ./appdata/nzbget/downloads:/downloads
@@ -110,7 +110,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ='America/Chicago'
+      - TZ=America/Chicago
     volumes:
       - ./appdata/nzbhydra2:/config
     ports:
@@ -137,7 +137,7 @@ services:
       - 32413:32413/udp
       - 32414:32414/udp
     environment:
-      - TZ='America/Chicago'
+      - TZ=America/Chicago
       - ADVERTISE_IP=http://192.168.1.100:32400/
       - PLEX_UID=1000
       - PLEX_GID=1000
@@ -159,7 +159,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ='America/Chicago'
+      - TZ=America/Chicago
     volumes:
       - ./appdata/radarr:/config
       - /mnt/storage/movies:/movies
@@ -179,7 +179,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ='America/Chicago'
+      - TZ=America/Chicago
     volumes:
       - ./appdata/sonarr:/config
       - /mnt/storage/tv:/tv
@@ -212,7 +212,7 @@ services:
     volumes:
       - ./appdata/unifi:/unifi
     environment:
-      - TZ='America/Chicago'
+      - TZ=America/Chicago
       - UNIFI_UID=1000
       - UNIFI_GID=1000
     ports:
