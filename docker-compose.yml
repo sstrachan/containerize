@@ -62,6 +62,13 @@ services:
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.entrypoints=websecure"
 
+  cloudflare-ddns:
+    image: oznu/cloudflare-ddns
+    restart: unless-stopped
+    environment:
+      - API_KEY=${CLOUDFLARE_API_KEY:?Set $$CLOUDFLARE_API_KEY in env}
+      - ZONE=${HOST_URL:?Set $$HOST_URL in env}
+
   home-assistant:
     image: homeassistant/home-assistant:stable
     volumes:
