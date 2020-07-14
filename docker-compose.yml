@@ -208,6 +208,24 @@ services:
       # - "traefik.http.routers.speedtest.tls.certresolver=myresolver"
     restart: unless-stopped
 
+  tautulli:
+    image: linuxserver/tautulli
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Chicago
+    volumes:
+      - ./appdata/tautulli:/config
+      - ./appdata/plex/database/Library/Application Support/Plex Media Server/Logs:/logs:ro
+    ports:
+      - 8181:8181
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tautulli.rule=Host(`tautulli.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.tautulli.entrypoints=websecure"
+      - "traefik.http.routers.tautulli.tls=true"
+
   unifi:
     image: jacobalberty/unifi:stable
     volumes:
