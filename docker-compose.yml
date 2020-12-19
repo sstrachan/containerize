@@ -213,7 +213,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Chicago
+      - TZ=America/Chicago
     volumes:
       - ./appdata/tautulli:/config
       - ./appdata/plex/database/Library/Application Support/Plex Media Server/Logs:/logs:ro
@@ -225,6 +225,31 @@ services:
       - "traefik.http.routers.tautulli.rule=Host(`tautulli.${HOST_URL:?Set $$HOST_URL in env}`)"
       - "traefik.http.routers.tautulli.entrypoints=websecure"
       - "traefik.http.routers.tautulli.tls=true"
+
+  transmission:
+    image: ghcr.io/linuxserver/transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - TRANSMISSION_WEB_HOME=/combustion-release/ #optional
+      #- USER=username #optional
+      #- PASS=password #optional
+    volumes:
+      - ./appdata/tranmission/config:/config
+      - ./appdata/tranmission/downloads:/downloads
+      - ./appdata/tranmission/watch:/watch
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.transmission.rule=Host(`transmission.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.transmission.entrypoints=websecure"
+      - "traefik.http.routers.transmission.tls=true"
+      - "traefik.http.services.transmission.loadbalancer.server.port=9091"
 
   unifi:
     image: jacobalberty/unifi:stable-6
