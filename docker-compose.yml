@@ -76,8 +76,8 @@ services:
       - ./appdata/home-assistant:/config
     ports:
       - "8123:8123"
-    devices:
-      - "/dev/serial/by-id/usb-0658_0200-if00:/dev/ttyACM0"
+#    devices:
+#      - "/dev/serial/by-id/usb-0658_0200-if00:/dev/ttyACM0"
     environment:
       - TZ=America/Chicago
     restart: unless-stopped
@@ -272,3 +272,22 @@ services:
       - "traefik.http.routers.unifi.tls=true"
       - "traefik.http.services.unifi.loadbalancer.server.port=8443"
       - "traefik.http.services.unifi.loadbalancer.server.scheme=https"
+
+  zwavejs:
+    image: zwavejs/zwavejs2mqtt:latest
+    ports:
+      - 8091:8091
+      - 3000:3000
+    devices:
+      - "/dev/serial/by-id/usb-0658_0200-if00:/dev/zwave"
+    volumes:
+      - ./appdata/zwavejs:/user/src/app/store
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zwavejs.rule=Host(`zwavejs.${HOST_URL:?Set $$HOST_URL in env}`)"
+      - "traefik.http.routers.zwavejs.entrypoints=websecure"
+      - "traefik.http.routers.zwavejs.tls=true"
+      - "traefik.http.services.zwavejs.loadbalancer.server.port=8091"
+      - "traefik.http.routers.radarr.middlewares=auth"
+
