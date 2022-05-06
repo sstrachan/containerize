@@ -289,5 +289,5 @@ services:
       - "traefik.http.routers.zwavejs.entrypoints=websecure"
       - "traefik.http.routers.zwavejs.tls=true"
       - "traefik.http.services.zwavejs.loadbalancer.server.port=8091"
-      - "traefik.http.routers.radarr.middlewares=auth"
+      - "traefik.http.routers.zwavejs.middlewares=auth"
 
