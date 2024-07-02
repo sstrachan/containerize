@@ -252,7 +252,7 @@ services:
       - "traefik.http.services.transmission.loadbalancer.server.port=9091"
 
   unifi:
-    image: jacobalberty/unifi:stable-6
+    image: jacobalberty/unifi:latest
     volumes:
       - ./appdata/unifi:/unifi
     environment:
