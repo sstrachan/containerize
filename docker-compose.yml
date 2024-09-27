@@ -88,7 +88,7 @@ services:
       - "traefik.http.routers.home-assistant.tls=true"
 
   nzbget:
-    image: linuxserver/nzbget
+    image: lscr.io/linuxserver/nzbget:latest
     environment:
       - PUID=1000
       - PGID=1000
@@ -107,7 +107,7 @@ services:
       - "traefik.http.routers.nzbget.middlewares=auth"
 
   nzbhydra2:
-    image: linuxserver/nzbhydra2
+    image: lscr.io/linuxserver/nzbhydra2:latest
     environment:
       - PUID=1000
       - PGID=1000
